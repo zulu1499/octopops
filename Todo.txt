@@ -1,0 +1,2 @@
+1. Join nxc and fping output to one file and eliminate duplicates
+2. Implement the split 64 hosts by file to an nmap directory
