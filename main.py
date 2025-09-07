@@ -9,7 +9,7 @@ def parse_args():
     parser.add_argument("-o", "--outdir", default="octopops_results", help="Directory to store results")
 
     args = parser.parse_args()
-    if not is_valid_subnet(args.subnet):
+    if not ip_utils.is_valid_subnet(args.subnet):
         print(f"{Fore.RED}[!] Invalid subnet format: {args.subnet}{Style.RESET_ALL}")
         parser.print_help()
         exit(1)
@@ -18,7 +18,7 @@ def parse_args():
 
 
 def main():
-    print_banner_slowly()
+    banner.print_banner_slowly()
     args = parse_args()
     
     scanner = Octopops(args.subnet, args.outdir)

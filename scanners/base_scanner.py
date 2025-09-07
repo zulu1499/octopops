@@ -28,6 +28,6 @@ class Scanner:
             print(f"{Fore.YELLOW}[!]{self.banner} did not return any results to save {Style.RESET_ALL}")
             return
 
-        output_file.write_text(self.results)
+        output_file.write_text(output)
         print(f"{Fore.GREEN}[+]{self.banner} Saving results saved to {output_file}{Style.RESET_ALL}")
         return output_file

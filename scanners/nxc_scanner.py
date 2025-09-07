@@ -8,7 +8,7 @@ class NxcScanner(Scanner):
 
     def __init__(self, name: str, banner: str, subnet: str, outdir: Path):
         super().__init__(name, banner, subnet, outdir)  # Initialize superclass attributes
-        self.ips: str = ""                           # New attribute for extracted IPs
+        self.ips: str | None = ""                      # New attribute for extracted IPs
         self.eternalblue_hosts = []             # New attribute for EternalBlue hosts (dicts)
         self.eternalblue_ips: str = ""               # New attribute for EternalBlue IPs only
 

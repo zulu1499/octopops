@@ -1,0 +1,45 @@
+Host: 192.168.12.10 - Reason: SMBv1 enabled
+Host: 192.168.12.50 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.12.109 - Reason: Windows 7 / Server 2008 R2 Build 7601 
+Host: 192.168.12.114 - Reason: Windows 7 / Server 2008 R2 Build 7601 x64 
+Host: 192.168.32.240 - Reason: SMBv1 enabled
+Host: 192.168.36.15 - Reason: Windows Server 2012 R2 Standard 9600 x64 
+Host: 192.168.36.42 - Reason: Windows Server 2012 R2 Standard 9600 x64 
+Host: 192.168.36.100 - Reason: Windows Server 2012 R2 Standard 9600 x64 
+Host: 192.168.40.62 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.41.220 - Reason: SMBv1 enabled
+Host: 192.168.42.247 - Reason: Windows 7 Professional 7601 Service Pack 1 
+Host: 192.168.43.211 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.46.44 - Reason: Windows Server 2008 R2 Standard 7601 Service Pack 1 x64 
+Host: 192.168.46.125 - Reason: Windows Server 2008 R2 Standard 7601 Service Pack 1 x64 
+Host: 192.168.46.116 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.47.100 - Reason: Windows Server 2003 R2 3790 Service Pack 2 
+Host: 192.168.61.50 - Reason: SMBv1 enabled
+Host: 192.168.61.61 - Reason: Windows Server 2008 R2 Enterprise 7601 Service Pack 1 x64 
+Host: 192.168.61.130 - Reason: SMBv1 enabled
+Host: 192.168.69.90 - Reason: SMBv1 enabled
+Host: 192.168.69.92 - Reason: Windows Server 2012 R2 Standard 9600 x64 
+Host: 192.168.69.190 - Reason: SMBv1 enabled
+Host: 192.168.104.32 - Reason: SMBv1 enabled
+Host: 192.168.140.212 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.141.123 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.146.57 - Reason: SMBv1 enabled
+Host: 192.168.147.177 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.152.52 - Reason: Windows 7 Professional 7601 Service Pack 1 
+Host: 192.168.152.143 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.152.195 - Reason: Windows 7 Professional 7601 Service Pack 1 
+Host: 192.168.152.205 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.152.248 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.153.51 - Reason: SMBv1 enabled
+Host: 192.168.153.113 - Reason: SMBv1 enabled
+Host: 192.168.153.237 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.154.50 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.154.107 - Reason: SMBv1 enabled
+Host: 192.168.154.214 - Reason: Windows 7 Professional 7601 Service Pack 1 x64 
+Host: 192.168.161.33 - Reason: Windows Server 2003 3790 Service Pack 1 
+Host: 192.168.161.52 - Reason: Windows Server 2012 R2 Standard 9600 x64 
+Host: 192.168.161.130 - Reason: SMBv1 enabled
+Host: 192.168.169.90 - Reason: SMBv1 enabled
+Host: 192.168.169.50 - Reason: SMBv1 enabled
+Host: 192.168.176.21 - Reason: SMBv1 enabled
+Host: 192.168.176.20 - Reason: SMBv1 enabled

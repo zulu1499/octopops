@@ -93,13 +93,14 @@ Planned features:
 ---
 
 ## 📂 Project Structure
-
+```bash
 octopops/
 ├── core/orchestrator.py      # Main runner
 ├── scanners/            # Scanners (fping, nxc, etc.)
 ├── processors/          # Post-processing modules (filters, reports, etc.)
 ├── utils/               # Helper functions (IP sorting, parsing)
 └── setup.py             # Setup for pip install
+```
 
 ---
 
