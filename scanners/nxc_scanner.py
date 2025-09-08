@@ -1,5 +1,5 @@
 import re
-from .base_scanner import Scanner
+from scanners import Scanner
 from colorama import Fore, Style
 from processors import *
 from pathlib import Path
@@ -12,7 +12,7 @@ class NxcScanner(Scanner):
         self.eternalblue_hosts = []             # New attribute for EternalBlue hosts (dicts)
         self.eternalblue_ips: str = ""               # New attribute for EternalBlue IPs only
 
-    def run_scan(self) -> str | None:
+    def run_discovery_scan(self) -> str | None:
         command = ["nxc", "smb", self.subnet]
         raw_output = super().run(command)
 

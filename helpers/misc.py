@@ -1,7 +1,8 @@
 from helpers.ip_utils import sort_ips_in_ascending
 from colorama import Fore, Style
+import os
 
-banner_misc = "[HELPER   MISC]"
+banner_misc = "[HELPER MISC]"
 def merge_sort_ips(*strings: str) -> str:
     """
     Merge multiple strings, remove duplicate lines, and sort IPs in ascending order.
@@ -52,3 +53,22 @@ def split_file_by_hosts(file, outdir, hosts_per_file: int = 64, prefix: str = "s
         chunk_file = outdir / f"{prefix}_{i//hosts_per_file + 1}.txt"
         chunk_file.write_text("\n".join(chunk_ips))
         print(f"{Fore.GREEN}[+]{banner_misc} Created {chunk_file} with {len(chunk_ips)} IPs")
+
+def check_for_root_requirement(command: list[str]) -> bool:
+    """
+    Check if a command requires root.
+
+    Currently, only `nmap -sn` requires root in your setup.
+    You can extend this for other scanners.
+
+    Returns:
+        bool: True if root is required, False otherwise.
+    """
+    # Example: check if command needs sudo privileges
+    if command[0] == "sudo":
+        return True
+    return False
+
+def is_root() -> bool:
+    """Check if the current user is root."""
+    return os.geteuid() == 0
