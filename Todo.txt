@@ -1,2 +1,2 @@
-1. Implement the split 64 hosts by file to an nmap directory
-3. Add further processing modules
+1. Implement queuing for scans that run over large subnet /8.
+2. Commence phase 2: Processing Scanners
