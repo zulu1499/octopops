@@ -1,3 +1,2 @@
 1. Implement the split 64 hosts by file to an nmap directory
-2. Integrate the nmap host discovery scanner
 3. Add further processing modules

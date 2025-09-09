@@ -2,6 +2,7 @@ import re
 
 
 class EternalBlueFilter:
+    banner = "[EternalBlueFilter]"
     def __init__(self, output: str):
         self.output = output
 

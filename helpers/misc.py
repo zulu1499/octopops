@@ -31,29 +31,30 @@ def merge_sort_ips(*strings: str) -> str:
     return merged_sorted_ips
 
 
-def split_file_by_hosts(file, outdir, hosts_per_file: int = 64, prefix: str = "subnet_chunk"):
+# -------------------------- SPLIT IPS BY FILE --------------------------
+def split_ips_by_file(ip_content, outdir, ips_per_file: int = 64, prefix: str = "subnet_chunk"):
     """
     Split a file containing IP addresses into multiple files, each containing a fixed number of hosts.
 
     Args:
         input_file (Path): Path to the input file containing IPs (one per line).
         outdir (Path): Directory where the output files will be saved.
-        hosts_per_file (int, optional): Number of IPs per output file. Default is 64.
+        ips_per_file (int, optional): Number of IPs per output file. Default is 64.
         prefix (str, optional): Prefix for output file names. Default is "chunk".
     """
-    outdir.mkdir(exist_ok=True)
+
+    # Split the string into individual IPs
+    ips = [line.strip() for line in ip_content.splitlines() if line.strip()]
     
-    # Read all IPs from the input file
-    with file.open("r") as f:
-        ips = [line.strip() for line in f if line.strip()]
-    
-    # Split into chunks
-    for i in range(0, len(ips), hosts_per_file):
-        chunk_ips = ips[i:i+hosts_per_file]
-        chunk_file = outdir / f"{prefix}_{i//hosts_per_file + 1}.txt"
+    # Split into chunks and write files
+    for i in range(0, len(ips), ips_per_file):
+        chunk_ips = ips[i:i+ips_per_file]
+        chunk_file = outdir / f"{prefix}_{i//ips_per_file + 1}.txt"
         chunk_file.write_text("\n".join(chunk_ips))
         print(f"{Fore.GREEN}[+]{banner_misc} Created {chunk_file} with {len(chunk_ips)} IPs")
 
+
+# -------------------------- CHECK FOR ROOT --------------------------
 def check_for_root_requirement(command: list[str]) -> bool:
     """
     Check if a command requires root.

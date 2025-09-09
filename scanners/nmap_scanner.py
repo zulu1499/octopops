@@ -1,10 +1,10 @@
 import subprocess
 from pathlib import Path
 from colorama import Fore, Style
-from scanners import Scanner
+from scanners import *
 import re
 
-class NmapScanner(Scanner):
+class NmapScanner(DiscoveryScanner):
 #     def __init__(self, banner: str, subnet: str, outdir: Path):
 #         super().__init__("nmap_scanner", "NmapScanner", subnet, outdir)
 
@@ -19,9 +19,9 @@ class NmapScanner(Scanner):
             print(f"{Fore.YELLOW}[!]{self.banner} Did not return any hosts alive (subnet empty?){Style.RESET_ALL}")
             self.results = None
             return 
-            
-        print(f"{Fore.GREEN}[+]{self.banner} Raw output:\n{raw_output}{Style.RESET_ALL}")
+        
         self.results = raw_output
+        self.print_raw_output()
         return
 
 

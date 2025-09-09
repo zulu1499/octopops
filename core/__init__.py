@@ -1,3 +1,3 @@
-from .orchestrator import Octopops
+from .orchestrator import Orchestrator
 
-__all__ = ["Octopops"]
+__all__ = ["Orchestrator"]

@@ -1,10 +1,10 @@
 import re
 import ipaddress
-from scanners import Scanner
+from scanners import *
 from colorama import Fore, Style
 from helpers import sort_ips_in_ascending
 
-class FpingScanner(Scanner):
+class FpingScanner(DiscoveryScanner):
 
     def run_discovery_scan(self) -> str | None:
         command = ["fping", "-a", "-s", "-g", "-q", self.subnet]
@@ -16,7 +16,8 @@ class FpingScanner(Scanner):
             return
         
         ips_sorted = sort_ips_in_ascending(raw_output)
-        print(f"{Fore.GREEN}[+][FpingScanner] Raw output:\n{ips_sorted}{Style.RESET_ALL}")
+
         self.results = ips_sorted
         self.ips = ips_sorted
+        self.print_raw_output()
         return 

@@ -1,10 +1,10 @@
 import re
-from scanners import Scanner
+from scanners import *
 from colorama import Fore, Style
 from processors import *
 from pathlib import Path
 
-class NxcScanner(Scanner):
+class NxcScanner(DiscoveryScanner):
 
     def __init__(self, name: str, banner: str, subnet: str, outdir: Path):
         super().__init__(name, banner, subnet, outdir)  # Initialize superclass attributes
@@ -21,15 +21,10 @@ class NxcScanner(Scanner):
             self.results = None
             return
         
-        print(f"{Fore.GREEN}[+]{self.banner} Raw output:\n{raw_output}{Style.RESET_ALL}")
         self.results = raw_output
+        self.print_raw_output()
         return
 
-    def extract_ips(self):
-        if self.results:
-            extracted_ips = IPExtractor.extract(self.results)
-            self.ips = extracted_ips
-            return 
     
     def filter_eternalblue(self):
         if self.results:
