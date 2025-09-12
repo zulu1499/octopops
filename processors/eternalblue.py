@@ -11,7 +11,7 @@ class EternalBlueFilter:
 
         ip_version_pattern = re.compile(
             r"(?P<ip>\b\d{1,3}(?:\.\d{1,3}){3}\b).*?\[\*\]\s*"
-            r"(?P<version>Windows\s(?:Server\s)?(?:2003|2008|2008 R2|2012|2012 R2|7|8|8\.1)[^\(]*)",
+            r"(?P<version>Windows\s(?:Server\s)?(?:2003|2008|2008 R2|2012|2012 R2|5|5.1|7|8|8\.1)[^\(]*)",
             re.IGNORECASE
         )
         smb1_pattern = re.compile(

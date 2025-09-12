@@ -1,2 +1,4 @@
-1. Implement queuing for scans that run over large subnet /8.
-2. Commence phase 2: Processing Scanners
+1. implement the ms017 scanner and test results
+2. Implement the nmap/masscan processing scanner and test results
+3. extract results of nmap and parse them to a data type (json) where each ips holds an array of open ports
+to do further processing on ftp ports

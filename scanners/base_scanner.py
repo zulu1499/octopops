@@ -50,6 +50,8 @@ class DiscoveryScanner:
 
         self.results = result.stdout.strip()
         return self.results
+    
+    
 
     def print_raw_output(self):
         print(f"{Fore.GREEN}[+]{self.banner} Raw discovery scanner output:{Style.RESET_ALL}")
@@ -64,6 +66,14 @@ class DiscoveryScanner:
         output_file.write_text(output)
         print(f"{Fore.GREEN}[+]{self.banner} Saving results to {output_file}{Style.RESET_ALL}")
         return output_file
+    
+    def append(self, output, output_file: Path, chunk: str | None = None):
+        """Append results to a file"""
+        if output:
+            with output_file.open("a") as f:
+                f.write(output + "\n")
+            print(f"{Fore.GREEN}[+]{self.banner} Appending results of subnet {chunk} to {output_file}{Style.RESET_ALL}")
+            return output_file
 
     def extract_ips(self):
         if self.results:

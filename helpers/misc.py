@@ -1,8 +1,9 @@
-from helpers.ip_utils import sort_ips_in_ascending
+from helpers import IPUtils
 from colorama import Fore, Style
 import os
 
 banner_misc = "[HELPER MISC]"
+
 def merge_sort_ips(*strings: str) -> str:
     """
     Merge multiple strings, remove duplicate lines, and sort IPs in ascending order.
@@ -25,7 +26,7 @@ def merge_sort_ips(*strings: str) -> str:
                 merged_lines.append(line)
 
     # Sort the IPs using your existing helper
-    merged_sorted_ips = sort_ips_in_ascending("\n".join(merged_lines))
+    merged_sorted_ips = IPUtils.sort_ips_in_ascending("\n".join(merged_lines))
 
     # Already a string, just return it
     return merged_sorted_ips
@@ -51,7 +52,8 @@ def split_ips_by_file(ip_content, outdir, ips_per_file: int = 64, prefix: str = 
         chunk_ips = ips[i:i+ips_per_file]
         chunk_file = outdir / f"{prefix}_{i//ips_per_file + 1}.txt"
         chunk_file.write_text("\n".join(chunk_ips))
-        print(f"{Fore.GREEN}[+]{banner_misc} Created {chunk_file} with {len(chunk_ips)} IPs")
+    
+    print(f"{Fore.GREEN}[+]{banner_misc} Created {len(ips)/ips_per_file:.3f} files in {outdir} with {ips_per_file} IPs")
 
 
 # -------------------------- CHECK FOR ROOT --------------------------

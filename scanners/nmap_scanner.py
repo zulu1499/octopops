@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 from colorama import Fore, Style
+from helpers import *
 from scanners import *
 import re
 
@@ -11,7 +12,7 @@ class NmapScanner(DiscoveryScanner):
     def run_discovery_scan(self) -> str | None:
         """Run Nmap host discovery scan (-sn)"""
 
-        command = ["sudo", "nmap", "-sn", "-n", self.subnet]  # -n = no DNS resolution
+        command = ["sudo", "nmap", "-sn", "-n", self.subnet]
         raw_output = super().run(command)
         self.results = raw_output.strip()
             
@@ -23,15 +24,37 @@ class NmapScanner(DiscoveryScanner):
         self.results = raw_output
         self.print_raw_output()
         return
+    
+    
+    def run_discovery_scan_chunked(self, output_file: Path):
+        """
+        Run nmap discovery on /24 subnets and append results incrementally.
+        
+        Args:
+            output_file (Path): File to append results for each processed chunk.
+        """
+        all_results = []  # Optional: keep accumulated results in memory
+        
+        for chunk in IPUtils._chunk_subnet(self.subnet):  # generator yielding /24 subnets
+            print(f"{Fore.CYAN}[*]{self.banner} Scanning chunk {chunk}...{Style.RESET_ALL}")
+            
+            command = ["sudo", "nmap", "-sn", "-n", str(chunk)]
+            process = subprocess.run(command, capture_output=True, text=True)
+            raw_output = process.stdout.strip()
+            
+            if re.search(r"(0 hosts up)", raw_output):
+                print(f"{Fore.YELLOW}[!]{self.banner} No hosts alive in {chunk}, skipping.{Style.RESET_ALL}")
+                continue
+            
+            print(f"{Fore.GREEN}[+]{self.banner} Raw output from {chunk}:{Style.RESET_ALL}")
+            print(raw_output)
+            # Store in object
+            if self.results:
+                self.results += "\n" + raw_output
+            else:
+                self.results = raw_output
+            
+            
+            # Append results incrementally to the file
+            self.append(self.results, output_file, str(chunk))
 
-
-    # def save(self, filename: str = "nmap_results.txt") -> Path | None:
-    #     """Save Nmap output to file"""
-    #     if not self.results:
-    #         print(f"{Fore.YELLOW}[!] {self.name} did not return any results to save{Style.RESET_ALL}")
-    #         return None
-
-    #     outfile = self.outdir / filename
-    #     outfile.write_text(self.results)
-    #     print(f"{Fore.GREEN}[+] {self.name} results saved to {outfile}{Style.RESET_ALL}")
-    #     return outfile

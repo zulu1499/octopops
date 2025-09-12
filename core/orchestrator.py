@@ -24,22 +24,26 @@ class Orchestrator:
 
 # --------------------------- NXC OUTPUT PROCESSING ---------------------------
     def output_processing_nxc(self, nxc: NxcScanner):
-        print(f"{Fore.CYAN}[*]{self.banner} Processing {nxc.banner} output...{Style.RESET_ALL}")
+        
         # Extract IPs from NXC results and save to file
         nxc.extract_ips()
         nxc.save(nxc.ips, self.outdir / f"{nxc.name}_extracted_ips.txt")
             
         # Filter EternalBlue vulnerable hosts and save to files
         nxc.filter_eternalblue()    
-        eternalblue_subdir = self.outdir / "eternal_blue_hosts"
-        eternalblue_subdir.mkdir(exist_ok=True)
-        nxc.save_eternalblue(nxc.eternalblue_ips, eternalblue_subdir / "nxc_eternalblue_ips.txt")
-        nxc.save_eternalblue(nxc.eternalblue_hosts, eternalblue_subdir / "nxc_eternalblue_hosts.txt")
+        nxc_processing_subdir = self.outdir / "nxc_processing"
+        nxc_processing_subdir.mkdir(exist_ok=True)
+        nxc.save_eternalblue(nxc.eternalblue_ips, nxc_processing_subdir / "nxc_eternalblue_ips.txt")
+        nxc.save_eternalblue(nxc.eternalblue_hosts, nxc_processing_subdir / "nxc_eternalblue_hosts.txt")
+
+        # Extract domains from NXC results and save to file
+        domains = nxc.extract_unique_domains_from_text(nxc.results) # type: ignore
+        nxc.save(domains, nxc_processing_subdir / "nxc_extracted_unique_domains.txt")
 
 
 # --------------------------- NMAP OUTPUT PROCESSING ---------------------------
     def output_processing_nmap(self, nmap: NmapScanner):
-        print(f"{Fore.CYAN}[*]{self.banner} Processing {nmap.banner} output...{Style.RESET_ALL}")
+        
         # Extract IPs from NXC results and save to file
         nmap.extract_ips()
         nmap.save(nmap.ips, self.outdir / f"{nmap.name}_extracted_ips.txt")
@@ -62,8 +66,8 @@ class Orchestrator:
                 # print(f"{Fore.GREEN}[+]{self.banner} Merged and sorted IPs from all scanners saved to {merged_file}{Style.RESET_ALL}")
                 print(f"{Fore.GREEN}[+]{self.banner} Merged and sorted {len(merged_sorted_ips.splitlines())} IPs from {len(positive_scanners)} scanners saved to {merged_file}{Style.RESET_ALL}")
                 
-                # Update ip_file to point to merged file for processing scanners
-                self.ip_file = merged_file  
+                # Update all_ips for phase 2 processing
+                self.all_ips = merged_sorted_ips  
             else:
                 print(f"{Fore.YELLOW}[!]{self.banner} No valid IPs found to merge and sort.{Style.RESET_ALL}")
         else:
@@ -71,20 +75,22 @@ class Orchestrator:
 
 
 # --------------------------- RUN DISCOVERY SCANNERS ---------------------------
-    def run_discovery_scanners(self):
+    def run_discovery_scanners(self, chunked : int | None = None) -> None:
         # Map scanner names to their classes
         discovery_scanner_classes = {
             "fping": FpingScanner,
             "nxc": NxcScanner,
             "nmap": NmapScanner,
         }
-        
-
 
         # If no scanners specified or "all" is specified, use all available scanners
         if not self.discovery_scanners or "all" in self.discovery_scanners:
             self.discovery_scanners = list(discovery_scanner_classes.keys())  # all scanners
 
+        # If chunked is specified print chunked banner
+        if chunked:
+            print(f"{Fore.LIGHTMAGENTA_EX}[*]{self.banner} Running Octopops in chunked mode ...{Style.RESET_ALL}")
+            IPUtils.chunk_size = chunked
 
         # Create discovery scanner objects and start threads
         for scanner_name in self.discovery_scanners:
@@ -96,7 +102,16 @@ class Orchestrator:
                     self.subnet,
                     self.outdir
                 )
-                t = threading.Thread(target=scanner.run_discovery_scan)
+
+                # Determine target function and arguments based on chunking
+                if chunked:
+                    target_func = scanner.run_discovery_scan_chunked
+                    args = (self.outdir / f"{scanner_name}_raw_results.txt",)
+                else:
+                    target_func = scanner.run_discovery_scan
+                    args = ()
+
+                t = threading.Thread(target=target_func, args=args)
                 t.start()
 
                 # Save references
@@ -107,11 +122,12 @@ class Orchestrator:
         for t in self.threads:
             t.join()
 
-
-        # Saving results after all scanners finished
-        for name, scanner in self.discovery_scanner_objects.items():
-            output_file = self.outdir / f"{name}_raw_results.txt"
-            scanner.save(scanner.results, output_file)
+        # Save raw results to files if not chunked
+        if not chunked:
+            # Saving results after all scanners finished
+            for name, scanner in self.discovery_scanner_objects.items():
+                output_file = self.outdir / f"{name}_raw_results.txt"
+                scanner.save(scanner.results, output_file)
 
         # --------------------------- For testing purposes ---------------------------
         # nxc_scanner.results = Path("test_data/nxc_sample_output.txt").read_text()
@@ -124,11 +140,13 @@ class Orchestrator:
         if "nxc" in self.discovery_scanners:
             nxc = self.discovery_scanner_objects.get("nxc")
             if isinstance(nxc, NxcScanner) and nxc.results:
+                print(f"{Fore.CYAN}[*]{self.banner} Processing {nxc.banner} raw output...{Style.RESET_ALL}")
                 self.output_processing_nxc(nxc)
         
         if "nmap" in self.discovery_scanners:
             nmap = self.discovery_scanner_objects.get("nmap")
             if isinstance(nmap, NmapScanner) and nmap.results:
+                print(f"{Fore.CYAN}[*]{self.banner} Processing {nmap.banner} raw output...{Style.RESET_ALL}")
                 self.output_processing_nmap(nmap)
 
 
@@ -153,8 +171,22 @@ class Orchestrator:
 
 # --------------------------- Run processing scanners on merged IPs ---------------------------
     
-    def run_processing_scanners(self, ip_file_arg: Path | None = None) -> None:
-        
+    def run_processing_scanners(self, ip_file_arg: Path | None = None, nxc_file_arg: Path | None = None) -> None:
+
+        # If nxc file is provided as an argument, use it to run nxc processing
+        if nxc_file_arg:
+            
+            file_content = nxc_file_arg.read_text().strip()  # Read file content
+            nxc_scanner = NxcScanner("nxc_scanner", "[NxcScanner]", "", self.outdir)
+
+            if file_content:
+                nxc_scanner.results = file_content
+                print(f"{Fore.CYAN}[*]{self.banner} Running NXC processing on {nxc_file_arg}...{Style.RESET_ALL}")
+                self.output_processing_nxc(nxc_scanner)
+            else:
+                print(f"{Fore.RED}[-]{self.banner} No valid content found in {nxc_file_arg}, skipping NXC processing.{Style.RESET_ALL}")
+
+                    
         # If an IP file is provided as an argument, use it else self.all_ips is already set (from discovery scanners)
         if ip_file_arg:
             print(f"{Fore.CYAN}[*]{self.banner} Using IPs from {ip_file_arg} for processing scanners...{Style.RESET_ALL}")
@@ -166,7 +198,7 @@ class Orchestrator:
                 print(f"{Fore.RED}[-]{self.banner} No valid IPs found in {ip_file_arg}, skipping processing scanners.{Style.RESET_ALL}")
                 return
             
-            self.all_ips = ip_utils.sort_ips_in_ascending(extracted_ips)  # Sort IPs and Store them in attribute
+            self.all_ips = IPUtils.sort_ips_in_ascending(extracted_ips)  # Sort IPs and Store them in attribute
             print(f"{Fore.GREEN}[+]{self.banner} Loaded {len(self.all_ips.splitlines())} valid IPs from {ip_file_arg}{Style.RESET_ALL}")
             
             # Save the extracted and sorted IPs to a file
@@ -181,3 +213,6 @@ class Orchestrator:
             split_subdir.mkdir(exist_ok=True)
             print(f"{Fore.CYAN}[*]{self.banner} Splitting IPs into chunks of 64 for nmap processing...{Style.RESET_ALL}")
             misc.split_ips_by_file(self.all_ips, split_subdir, ips_per_file=64, prefix="subnet_chunk")
+
+
+    

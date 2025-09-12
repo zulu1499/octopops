@@ -1,0 +1,28 @@
+        # Create discovery scanner objects and start threads
+        for scanner_name in self.discovery_scanners:
+            ScannerClass = discovery_scanner_classes.get(scanner_name)
+            if ScannerClass:
+                scanner = ScannerClass(
+                    f"{scanner_name}_discovery_scanner",
+                    f"[{scanner_name.capitalize()}Scanner]",
+                    self.subnet,
+                    self.outdir
+                )
+                t = threading.Thread(target=scanner.run_discovery_scan)
+                t.start()
+
+                # Save references
+                self.discovery_scanner_objects[scanner_name] = scanner
+                self.threads.append(t)
+
+        # Wait for all threads to complete
+        for t in self.threads:
+            t.join()
+
+
+    def run_discovery_scan_chunked(self, output_file: Path):
+        super().run_chunked(
+            output_file=output_file,
+            chunk_generator=ip_utils._chunk_subnet(self.subnet),
+            command_builder=lambda chunk: ["nxc", "smb", chunk]
+        )
