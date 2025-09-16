@@ -1,6 +1,6 @@
 import re
 import subprocess
-from scanners import *
+from discovery_scanners import *
 from colorama import Fore, Style
 from processors import *
 from pathlib import Path

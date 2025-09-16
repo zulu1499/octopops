@@ -2,10 +2,11 @@ import threading
 from pathlib import Path
 from colorama import Fore, Style
 from typing import cast
-from scanners import *
+from discovery_scanners import *
 from processors.ip_extractor import IPExtractor
 from processors.eternalblue import EternalBlueFilter
 from helpers import *
+from processing_scanners import *
 
 class Orchestrator:
     def __init__(self, subnet: str | None, outdir: Path, discovery_scanners: list[str]):
@@ -207,7 +208,7 @@ class Orchestrator:
             print(f"{Fore.GREEN}[+]{self.banner} Saving results to {output_file}{Style.RESET_ALL}")
 
 
-    # Split all discovered ips into 64 hosts chuncks for nmap ---------------------------
+        # Split all discovered ips into 64 hosts chuncks for nmap ---------------------------
         if len(self.all_ips.splitlines()) > 64:
             split_subdir = self.outdir / "64_ip_per_file_for_nmap"
             split_subdir.mkdir(exist_ok=True)
@@ -215,4 +216,8 @@ class Orchestrator:
             misc.split_ips_by_file(self.all_ips, split_subdir, ips_per_file=64, prefix="subnet_chunk")
 
 
+        #Run Nmap processing scanner on the directory "64_ip_per_file_for_nmap"
+        if split_subdir.exists: # type: ignore
+            nmap_processing_scanner = NmapProcessingScanner("nmap_processing_scanner", "[NmapProcessingScanner]", self.outdir / f"nmap_processing")
+            nmap_processing_scanner.scan_all_chunks(split_subdir) # type: ignore
     
