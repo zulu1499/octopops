@@ -56,36 +56,4 @@ class NmapScanner(DiscoveryScanner):
             
             
             # Append results incrementally to the file
-            self.append(self.results, output_file, str(chunk))
-
-    @staticmethod
-    def natural_sort_key(path: Path):
-        """Sort paths with numbers in natural numeric order."""
-        return [int(text) if text.isdigit() else text.lower() for text in re.split(r"(\d+)", str(path))]
-
-    def run_nmap_on_file(self, ip_file: Path, result_file: Path):
-        """Run nmap on a single IP file and save output to result_file."""
-        print(f"[+] Processing file {ip_file} ...")
-        cmd = ["sudo", "nmap", "-iL", str(ip_file), "--open", "-Pn", "-oX", "-", "-oN", str(result_file)]
-        process = subprocess.run(cmd, capture_output=True, text=True)
-
-        raw_output = process.stdout.strip()
-        
-        if not re.search(r"(0 hosts up)", raw_output):
-            # if scan is positive append results to an xml file
-            # PROCESS THE XML OUTPUT EXTRACT HOSTS AND PORTS
-            # APPEND THE PROCESSED output to a file
-            pass
-
-        print(f"[+] Saved results to {result_file}")
-
-    def scan_all_chunks(self, ip_files_dir: Path, prefix="nmap_chunk_result_"):
-        """Scan all 64-IP chunk files in numeric order."""
-        ip_files = sorted(ip_files_dir.glob("*.txt"), key=self.natural_sort_key)
-        self.outdir.mkdir(parents=True, exist_ok=True)
-
-        for idx, ip_file in enumerate(ip_files, start=1):
-            result_file = self.outdir / f"{prefix}{idx}.txt"
-            print(f"{Fore.GREEN}Processing file {result_file}")
-            self.run_nmap_on_file(ip_file, result_file)
-
+            self.append(raw_output, output_file, str(chunk))

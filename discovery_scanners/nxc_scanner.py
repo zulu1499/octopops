@@ -18,8 +18,12 @@ class NxcScanner(DiscoveryScanner):
         command = ["nxc", "smb", "--no-progress", self.subnet]
         raw_output = super().run(command)
 
-        if re.fullmatch(r"Running nxc against \d+ targets ━+ 100% \d+:\d+:\d+", raw_output):
-            print(f"{Fore.YELLOW}[!]{self.banner} Did not return any hosts alive (subnet empty?)")
+        # if re.fullmatch(r"Running nxc against \d+ targets ━+ 100% \d+:\d+:\d+", raw_output):
+        #     print(f"{Fore.YELLOW}[!]{self.banner} Did not return any hosts alive (subnet empty?)")
+        #     self.results = None
+        #     return
+        if not raw_output:
+            print(f"{Fore.YELLOW}[!]{self.banner} No hosts alive in {self.subnet}, skipping.{Style.RESET_ALL}")
             self.results = None
             return
         
@@ -60,7 +64,7 @@ class NxcScanner(DiscoveryScanner):
             
             
             # Append results incrementally to the file
-            self.append(self.results, output_file, str(chunk))
+            self.append(raw_output, output_file, str(chunk))
 
 
     def filter_eternalblue(self):

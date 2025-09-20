@@ -55,4 +55,4 @@ class FpingScanner(DiscoveryScanner):
             self.ips = self.results
             
             # Append results incrementally to the file
-            self.append(self.results, output_file, str(chunk))
+            self.append(ips_sorted, output_file, str(chunk))

@@ -26,3 +26,100 @@
             chunk_generator=ip_utils._chunk_subnet(self.subnet),
             command_builder=lambda chunk: ["nxc", "smb", chunk]
         )
+
+
+    def run_discovery_scanners(self, chunked : int | None = None) -> None:
+        # Map scanner names to their classes
+        discovery_scanner_classes = {
+            "fping": FpingScanner,
+            "nxc": NxcScanner,
+            "nmap": NmapScanner,
+        }
+
+        # If no scanners specified or "all" is specified, use all available scanners
+        if not self.discovery_scanners or "all" in self.discovery_scanners:
+            self.discovery_scanners = list(discovery_scanner_classes.keys())  # all scanners
+
+        # If chunked is specified print chunked banner
+        if chunked:
+            print(f"{Fore.LIGHTMAGENTA_EX}[*]{self.banner} Running Octopops in chunked mode ...{Style.RESET_ALL}")
+            IPUtils.chunk_size = chunked
+
+        # Create discovery scanner objects and start threads
+        for scanner_name in self.discovery_scanners:
+            ScannerClass = discovery_scanner_classes.get(scanner_name)
+            if ScannerClass:
+                scanner = ScannerClass(
+                    f"{scanner_name}_discovery_scanner",
+                    f"[{scanner_name.capitalize()}Scanner]",
+                    self.subnet,
+                    self.outdir
+                )
+
+                # Determine target function and arguments based on chunking
+                if chunked:
+                    target_func = scanner.run_discovery_scan_chunked
+                    args = (self.outdir / f"{scanner_name}_raw_results.txt",)
+                else:
+                    target_func = scanner.run_discovery_scan
+                    args = ()
+
+                t = threading.Thread(target=target_func, args=args)
+                t.start()
+
+                # Save references
+                self.discovery_scanner_objects[scanner_name] = scanner
+                self.threads.append(t)
+
+        # Wait for all threads to complete
+        for t in self.threads:
+            t.join()
+
+        # Save raw results to files if not chunked
+        if not chunked:
+            # Saving results after all scanners finished
+            for name, scanner in self.discovery_scanner_objects.items():
+                output_file = self.outdir / f"{name}_raw_results.txt"
+                scanner.save(scanner.results, output_file)
+
+        # --------------------------- For testing purposes ---------------------------
+        # nxc_scanner.results = Path("test_data/nxc_sample_output.txt").read_text()
+        # fping.results = Path("test_data/fping_sample_output.txt").read_text()
+        # fping.save(fping.results, self.outdir / "fping_results.txt")
+        # nxc.save(nxc.results, self.outdir / "nxc_results.txt")
+
+        # --------------------------- Processing ---------------------------
+        
+        if "nxc" in self.discovery_scanners:
+            nxc = self.discovery_scanner_objects.get("nxc")
+            if isinstance(nxc, NxcScanner) and nxc.results:
+                print(f"{Fore.CYAN}[*]{self.banner} Processing {nxc.banner} raw output...{Style.RESET_ALL}")
+                self.output_processing_nxc(nxc)
+        
+        if "nmap" in self.discovery_scanners:
+            nmap = self.discovery_scanner_objects.get("nmap")
+            if isinstance(nmap, NmapScanner) and nmap.results:
+                print(f"{Fore.CYAN}[*]{self.banner} Processing {nmap.banner} raw output...{Style.RESET_ALL}")
+                self.output_processing_nmap(nmap)
+
+
+        
+        # Filter only scanners that have non-empty extracted IPs or results
+        positive_scanners = [
+            scanner
+            for scanner in self.discovery_scanner_objects.values()
+            if getattr(scanner, "ips", None)
+        ]
+
+        if len(positive_scanners) > 1:
+            # Merge and sort IPs from both scanners and save to file
+            self.merge_discovery_scanners_ips(*positive_scanners)
+        else:
+            print(f"{Fore.YELLOW}[!]{self.banner} Skipping merge (not enough scanners returned results).{Style.RESET_ALL}")
+            self.all_ips = str(positive_scanners[0].ips)
+            output_file = self.outdir / "all_discovery_scanners_ips.txt"
+            output_file.write_text(self.all_ips)
+
+        # Run processing scanners
+        if self.all_ips:
+            self.run_processing_scanners()
