@@ -132,3 +132,20 @@ class NxcScanner(DiscoveryScanner):
         text = input_file.read_text()
         return self.extract_unique_domains_from_text(text)
     
+    def extract_smb_relay_targets(self, nxc_output: str):
+        
+        smb_relay_targets =[]
+
+        nxc_output = nxc_output.strip()
+        signing_false_pattern = re.compile(
+            r"(?P<ip>\b\d{1,3}(?:\.\d{1,3}){3}\b).*?\(signing:False\)",
+            re.IGNORECASE
+        )
+
+        for line in nxc_output.splitlines():
+            match = signing_false_pattern.search(line)
+            if match:
+                host = match.group("ip")
+                smb_relay_targets.append(host)
+        
+        return "\n".join(smb_relay_targets)

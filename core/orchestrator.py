@@ -36,6 +36,10 @@ class Orchestrator:
         nxc_processing_subdir.mkdir(exist_ok=True)
         nxc.save_eternalblue(nxc.eternalblue_ips, nxc_processing_subdir / "nxc_eternalblue_ips.txt")
         nxc.save_eternalblue(nxc.eternalblue_hosts, nxc_processing_subdir / "nxc_eternalblue_hosts.txt")
+        
+        # Extract SMB relay targets and save to file
+        smb_relay_targets = nxc.extract_smb_relay_targets(nxc.results) # type: ignore
+        nxc.save(smb_relay_targets, nxc_processing_subdir / "smb_relay_targets.txt")
 
         # Extract domains from NXC results and save to file
         domains = nxc.extract_unique_domains_from_text(nxc.results) # type: ignore
