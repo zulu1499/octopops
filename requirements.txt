@@ -1,0 +1,8 @@
+# Octopops Python dependencies.
+# Everything else used by octopops is part of the Python standard library
+# (argparse, ipaddress, pathlib, sqlite3, subprocess, threading, xml.etree, ...).
+#
+# NOTE: octopops also shells out to external binaries that are NOT pip packages
+# and must be installed separately: fping, nmap, and nxc (NetExec). See README.
+
+colorama

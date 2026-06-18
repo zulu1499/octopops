@@ -1,0 +1,41 @@
+# ---- Python bytecode / caches ----
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---- Packaging / build artifacts ----
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Test / type-checker / linter caches ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# ---- Octopops scan output ----
+# Default results directory (-o/--outdir defaults to octopops_results/)
+octopops_results/
+# SQLite databases produced by the nmap processing stage
+*.db
+
+# ---- Editor / OS cruft ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
