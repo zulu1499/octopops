@@ -102,7 +102,7 @@ def parse_args():
     #     args.discovery_scanners = []
 
     # Validate chunked value if provided
-    if args.chunked and (args.chunked < 9 or args.chunked > 32):
+    if args.chunked is not None and (args.chunked < 9 or args.chunked > 32):
         print(f"{Fore.RED}[!] --chunked value must be between 9 and 32.{Style.RESET_ALL}")
         parser.print_help()
         exit(1)

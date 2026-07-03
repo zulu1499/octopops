@@ -31,11 +31,22 @@ class XMLToJson:
                         continue  # skip malformed entry
 
                     service_elem = port.find("service")
+                    if service_elem is not None:
+                        parts = [
+                            service_elem.get("product", ""),
+                            service_elem.get("version", ""),
+                            service_elem.get("extrainfo", ""),
+                        ]
+                        version_str = " ".join(p for p in parts if p) or None
+                        service_name = service_elem.get("name")
+                    else:
+                        version_str = None
+                        service_name = None
                     open_ports.append({
                         "port": int(portid),
                         "protocol": port.get("protocol") or "unknown",
-                        "service": service_elem.get("name") if service_elem is not None else None,
-                        "version": service_elem.get("version") if service_elem is not None else None
+                        "service": service_name,
+                        "version": version_str,
                     })
 
             if open_ports:

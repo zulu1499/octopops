@@ -59,7 +59,7 @@ class DiscoveryScanner:
 
     def save(self, output, output_file: Path):
         """Save results to a file"""
-        if not self.results:
+        if not output:
             print(f"{Fore.YELLOW}[!]{self.banner} did not return any results to save {Style.RESET_ALL}")
             return
 

@@ -53,7 +53,8 @@ def split_ips_by_file(ip_content, outdir, ips_per_file: int = 64, prefix: str = 
         chunk_file = outdir / f"{prefix}_{i//ips_per_file + 1}.txt"
         chunk_file.write_text("\n".join(chunk_ips))
     
-    print(f"{Fore.GREEN}[+]{banner_misc} Created {len(ips)/ips_per_file:.3f} files in {outdir} with {ips_per_file} IPs")
+    file_count = (len(ips) + ips_per_file - 1) // ips_per_file
+    print(f"{Fore.GREEN}[+]{banner_misc} Created {file_count} files in {outdir} with {ips_per_file} IPs per file")
 
 
 # -------------------------- CHECK FOR ROOT --------------------------
