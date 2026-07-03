@@ -33,26 +33,37 @@ class NxcScanner(DiscoveryScanner):
 
     def run_discovery_scan_chunked(self, output_file: Path):
         """
-        Run fping discovery on /24 subnets and append results incrementally.
-        
+        Run nxc SMB discovery on /24 subnets and append results incrementally.
+
         Args:
             output_file (Path): File to append results for each processed chunk.
         """
-        all_results = []  # Optional: keep accumulated results in memory
-        
-        for chunk in IPUtils._chunk_subnet(self.subnet):  # generator yielding /24 subnets
+        checkpoint_file = output_file.parent / f"{self.name}_chunk_checkpoint.txt"
+        start_index = 0
+        if checkpoint_file.exists():
+            try:
+                start_index = int(checkpoint_file.read_text().strip()) + 1
+                print(f"{Fore.YELLOW}[*]{self.banner} Resuming from chunk {start_index}{Style.RESET_ALL}")
+            except ValueError:
+                start_index = 0
+
+        all_results = []
+
+        for idx, chunk in enumerate(IPUtils._chunk_subnet(self.subnet)):
+            if idx < start_index:
+                continue
+
             print(f"{Fore.CYAN}[*]{self.banner} Scanning chunk {chunk}...{Style.RESET_ALL}")
-            
+
             command = ["nxc", "smb", "--no-progress", str(chunk)]
             process = subprocess.run(command, capture_output=True, text=True)
             raw_output = process.stdout.strip()
 
-            
-            # if re.fullmatch(r"Running nxc against \d+ targets ━+ 100% \d+:\d+:\d+", raw_output):
             if not raw_output:
                 print(f"{Fore.YELLOW}[!]{self.banner} No hosts alive in {chunk}, skipping.{Style.RESET_ALL}")
+                checkpoint_file.write_text(str(idx))
                 continue
-                
+
             print(f"{Fore.GREEN}[+]{self.banner} Raw output from {chunk}:{Style.RESET_ALL}")
             print(raw_output)
 
@@ -61,10 +72,11 @@ class NxcScanner(DiscoveryScanner):
                 self.results += "\n" + raw_output
             else:
                 self.results = raw_output
-            
-            
+
+
             # Append results incrementally to the file
             self.append(raw_output, output_file, str(chunk))
+            checkpoint_file.write_text(str(idx))
 
 
     def filter_eternalblue(self):

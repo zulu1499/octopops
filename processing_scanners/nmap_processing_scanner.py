@@ -51,5 +51,8 @@ class NmapProcessingScanner(ProcessingScanner):
         chunked_scans_outdir.mkdir(parents=True, exist_ok=True)
 
         for idx, ip_file in enumerate(ip_files, start=1):
-            result_file = chunked_scans_outdir/ f"{prefix}{idx}.txt"
+            result_file = chunked_scans_outdir / f"{prefix}{idx}.txt"
+            if result_file.exists() and result_file.stat().st_size > 0:
+                print(f"{Fore.YELLOW}[*]{self.banner} Skipping chunk {idx} — already scanned{Style.RESET_ALL}")
+                continue
             self.run_nmap_on_file(ip_file, result_file)

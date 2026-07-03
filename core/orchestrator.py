@@ -83,7 +83,15 @@ class Orchestrator:
 # --------------------------- RUN DISCOVERY SCANNERS ---------------------------
 
     def run_discovery_scanners(self, chunked: int | None = None) -> None:
-        
+
+        # If Phase 1 already completed in a previous run, skip straight to Phase 2
+        phase1_checkpoint = self.outdir / "all_discovery_scanners_ips.txt"
+        if phase1_checkpoint.exists() and phase1_checkpoint.stat().st_size > 0:
+            print(f"{Fore.YELLOW}[*]{self.banner} Resuming: Phase 1 already complete, loading {phase1_checkpoint}{Style.RESET_ALL}")
+            self.all_ips = phase1_checkpoint.read_text().strip()
+            self.run_processing_scanners()
+            return
+
         # Map scanner names to their classes
         discovery_scanner_classes = {
             "fping": FpingScanner,
