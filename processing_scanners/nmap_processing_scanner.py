@@ -44,6 +44,18 @@ class NmapProcessingScanner(ProcessingScanner):
         DB.insert_nmap_scan_results(self.db_path, json_output, "hosts_ports")
         print(f"{Fore.GREEN}[+]{self.banner} Saved results to {result_file} and inserted into {self.db_path}")
 
+        if json_output:
+            total_ports = sum(len(ports) for ports in json_output.values())
+            print(f"{Fore.GREEN}[+]{self.banner} Found {len(json_output)} host(s) with {total_ports} open port(s):{Style.RESET_ALL}")
+            for ip, ports in json_output.items():
+                port_summary = ", ".join(
+                    f"{p['port']}/{p['protocol']} ({p['service'] or '?'}{(' ' + p['version']) if p['version'] else ''})"
+                    for p in ports
+                )
+                print(f"  {Fore.CYAN}{ip}{Style.RESET_ALL} → {port_summary}")
+        else:
+            print(f"{Fore.YELLOW}[!]{self.banner} No open ports found in this chunk.{Style.RESET_ALL}")
+
     def scan_all_chunks(self, ip_files_dir: Path, prefix="nmap_chunk_result_"):
         """Scan all 64-IP chunk files in numeric order."""
         ip_files = sorted(ip_files_dir.glob("*.txt"), key=self.natural_sort_key)
